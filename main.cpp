@@ -6,7 +6,12 @@
 //  Copyright © 2018 asdfuiop. All rights reserved.
 //
 
+<<<<<<< HEAD
 //FEATURE FLAG>USE_PROVINCE
+=======
+//FEATURE FLAG>USE_PROVINCES
+
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
 #ifdef _WIN32
 #include <SDL_ttf.h>
 #include <SDL_image.h>
@@ -116,6 +121,7 @@ void close()
     SDL_Quit();
 }
 
+<<<<<<< HEAD
 bool window_compare(window_UI* & i, window_UI* & j)
 {
     return (i->get_z() > j->get_z());
@@ -173,6 +179,29 @@ void update_time(std::vector<hero> & all_heros, std::vector<event> & active_even
         day+=1;
         
         for (int i=0; i<get_random_int(3, 5); i++)
+=======
+void update_time(std::vector<event> & active_events, std::vector<province> & provinces)
+{
+    hour+=1;
+    if (hour>24)
+    {
+        hour=1;
+        day+=1;
+        std::vector<event> to_remove;
+        for (auto & happening : active_events)
+        {
+            if (happening.update())
+            {
+                to_remove.push_back(happening);
+            }
+        }
+        for (event & no_longer_active : to_remove)
+        {
+            auto iterator = std::find(active_events.begin(), active_events.end(), no_longer_active);
+            active_events.erase(iterator);
+        }
+        for (int i=0; i<get_random_int(0, 5); i++)
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
         {
             coordinate temp_coord = {rand_x(eng), rand_y(eng)};
             event temp_event (temp_coord, event_ids, provinces);
@@ -223,8 +252,12 @@ std::string ordinal_indicator(int number)
 void left_mouse_click(const int & mouse_x, const int & mouse_y,
                       std::vector<event>& active_events,
                       std::vector<window_UI*>& all_windows,
+<<<<<<< HEAD
                       std::vector<hero>& all_heros,
                       SDL_Rect & minimap, SDL_Rect & current_screen, const float& mini_size, bool& paused,
+=======
+                      SDL_Rect & minimap, SDL_Rect & current_screen, const float& mini_size,
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                       bool& in_mini_click, bool& drag, int & drag_x, int & drag_y, int & pre_drag_cam_x, int & pre_drag_cam_y , std::vector<std::unique_ptr<icon>>& icon_holder)
 {
     bool active_click=false;
@@ -232,12 +265,16 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
     subwindow_reason window_to_deal_with;
     std::vector<int> already_selected_indices;
     int index_to_pass;
+<<<<<<< HEAD
     
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     for (auto & window : all_windows)
     {
         if (window->shown && window->in_bounds(mouse_x, mouse_y) && (!active_click))
         {
             active_click=true;
+<<<<<<< HEAD
             std::tie(window_to_deal_with, index_to_pass) = window->handle_click(mouse_x, mouse_y);
             switch (window->get_unique())
             {
@@ -271,16 +308,39 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
                     //need to pass info that hero was changed, changing screen
                     break;
                 case subwindow_reason::hero_overview:
+=======
+            switch (window->get_unique())
+            {
+                case subwindow_reason::roster:
+                    window->handle_click(mouse_x, mouse_y); //submit button should push them all to the important window
+                    break;
+                case subwindow_reason::hero:
+                    std::tie(window_to_deal_with, index_to_pass) = window->handle_click(mouse_x, mouse_y);
+                    //need to pass info that hero was changed, changing screen
+                    break;
+                case subwindow_reason::hero_overview:
+                    std::tie(window_to_deal_with, index_to_pass) = window->handle_click(mouse_x, mouse_y);
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                     for (auto & find_to_deal_with : all_windows)
                     {
                         if (find_to_deal_with->get_unique()==window_to_deal_with)
                         {
+<<<<<<< HEAD
                             hero_infoscreen* hero_info = dynamic_cast<hero_infoscreen*>(find_to_deal_with);
                             hero_info->current_hero=&all_heros[index_to_pass];
                             hero_info->changed=true;
                         }
                     }
                     break;
+=======
+                            find_to_deal_with->index_hero=index_to_pass;
+                        }
+                    }
+                    break;
+            };
+            if (window->get_unique()==subwindow_reason::roster)
+            {
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             }
         }
     }
@@ -318,7 +378,10 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
         {
             window->shown=false;
         }
+<<<<<<< HEAD
         paused=false;
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     }
     for (auto & is_clicked : icon_holder)
     {
@@ -335,6 +398,7 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
     }
     for (auto& event_clicked : active_events)
     {
+<<<<<<< HEAD
         if(event_clicked.handle_click(mouse_x, mouse_y, camera_x, camera_y))
         {
             for (auto & window : all_windows)
@@ -347,6 +411,9 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
                 }
             }
         }
+=======
+        event_clicked.handle_click(mouse_x, mouse_y, camera_x, camera_y, all_windows); //deals with loading the window with info
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     }
 }
 
@@ -357,6 +424,7 @@ void left_mouse_click(const int & mouse_x, const int & mouse_y,
 //------------------------------------------------------------------------------------------------------------------------------------//
 
 
+<<<<<<< HEAD
 void mouse_hover()
 {
     
@@ -366,11 +434,17 @@ void mouse_hover()
 //------------------------------------------------------------------------------------------------------------------------------------//
 //------------------------------------------------------------------------------------------------------------------------------------//
 
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
 void draw_everything
 (
                      std::vector<std::unique_ptr<texture_holder>>& maps, int map_width, int map_height, std::vector<event>& active_events,
                      SDL_Rect& minimap, float mini_size, int mini_equiv_x, int mini_equiv_y, int mini_equiv_w, int mini_equiv_h,
+<<<<<<< HEAD
                      SDL_Rect& current_screen, SDL_Rect& bottom_bar, bool& paused, std::vector<window_UI*>& all_windows_correct_draw_order,
+=======
+                     SDL_Rect& current_screen, SDL_Rect& bottom_bar, bool& paused, std::vector<window_UI*>& all_windows,
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                      texture_holder& center, texture_holder& corner, texture_holder& line, texture_holder& equipment_subrect,
                      std::vector<province> provinces, std::vector<std::unique_ptr<icon>>& icon_holder
 )
@@ -404,6 +478,7 @@ void draw_everything
         maps[i]->draw_this(renderer, mini_map_rect);
         maps[i]->change_alpha(renderer, 255);
     }
+<<<<<<< HEAD
     SDL_SetRenderDrawColor(renderer, 0, 0, 50, 220);
     for (event& pos_event : active_events)
     {
@@ -411,6 +486,9 @@ void draw_everything
         SDL_Rect event_on_minimap = SDL_Rect{int(event_loc.x*mini_size-3+980), int(event_loc.y*mini_size-3), 6, 6};
         SDL_RenderFillRect(renderer, &event_on_minimap);
     }
+=======
+    
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &minimap);
@@ -429,7 +507,14 @@ void draw_everything
     + " Day: " + std::to_string(day) + " Hour: " + std::to_string(hour);
     
     write_text(bottom_bar.x, bottom_bar.y, fancy_date, renderer, general_font, font_color_white);
+<<<<<<< HEAD
     for (window_UI* & to_draw : all_windows_correct_draw_order)
+=======
+    
+    paused=false;
+    
+    for (window_UI* & to_draw : all_windows)
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     {
         if (to_draw->shown)
         {
@@ -438,15 +523,23 @@ void draw_everything
             {
                 hero_window* cur_window = dynamic_cast<hero_window*>(to_draw);
                 to_draw->draw_full(renderer, general_font, font_color_darker);
+<<<<<<< HEAD
                 int y_offset = to_draw->get_spacing().y;
                 to_draw->border_drawer(&corner, &center, &line, renderer);
                 to_draw->title_drawer("Overview", renderer, title_font, font_color_white, y_offset*3/4);
                 cur_window->held_subwindow->shown=true;
+=======
+                to_draw->border_drawer(&corner, &center, &line, renderer, -(cur_window->subwindow_width));
+                to_draw->title_drawer("Overview", renderer, title_font, font_color_white, 60);
+                cur_window->held_subwindow->shown=true;
+                equipment_subrect.draw_this(renderer, SDL_Rect {160, 120, 200, 215});
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             }
             else if (to_draw->get_unique()==subwindow_reason::hero)
             {
                 to_draw->draw_full(renderer, stress_font, font_color_white);
                 to_draw->border_drawer(&corner, &center, &line, renderer);
+<<<<<<< HEAD
                 int equipment_width, equipment_height;
                 SDL_QueryTexture(equipment_subrect.get_texture(), NULL, NULL, &equipment_width, &equipment_height);
                 int window_x, window_y, window_h, window_w;
@@ -460,20 +553,27 @@ void draw_everything
                     equipment_height/=2;
                 }
                 equipment_subrect.draw_this(renderer, SDL_Rect {window_x+window_w/2-equipment_width/2, y_offset+window_y+y_inc, equipment_width, equipment_height});
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             }
             else if (to_draw->get_unique()==subwindow_reason::roster)
             {
                 to_draw->draw_full(renderer, general_font, font_color_darker);
                 to_draw->border_drawer(&corner, &center, &line, renderer);
+<<<<<<< HEAD
                 int height = to_draw->dimensions().h;
                 int y_spacing = to_draw->get_spacing().h;
                 int y_offset = to_draw->get_spacing().y;
                 to_draw->title_drawer("Assign", renderer, stress_font, font_color_darker, height-2*y_spacing+y_spacing/2);
                 to_draw->title_drawer("Roster", renderer, stress_font, font_color_white, y_offset*3/4);
+=======
+                to_draw->title_drawer("Roster", renderer, stress_font, font_color_white, 30);
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             }
             else if (to_draw->get_unique()==subwindow_reason::event_info)
             {
                 event_infoscreen* cur_window = dynamic_cast<event_infoscreen*>(to_draw);
+<<<<<<< HEAD
                 roster_screen* held_roster_window = dynamic_cast<roster_screen*>(cur_window->held_subwindow);
                 held_roster_window->currently_attached_to = to_draw;
                 if (cur_window->current_event->no_more_sent)
@@ -488,6 +588,11 @@ void draw_everything
                 to_draw->border_drawer(&corner, &center, &line, renderer);
                 int y_offset = to_draw->get_spacing().y;
                 to_draw->title_drawer("Event", renderer, title_font, font_color_white, y_offset*3/4);
+=======
+                to_draw->draw_full(renderer, general_font, font_color_white);
+                to_draw->border_drawer(&corner, &center, &line, renderer, -(cur_window->subwindow_width));
+                cur_window->held_subwindow->shown=true;
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             }
             else
             {
@@ -505,8 +610,11 @@ void draw_everything
         province.draw_province(renderer, camera_x, camera_y);
     }
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
 //difficulties of governing, clearly a pre-information age game
 void game_loop(bool& quit, std::vector<province> & provinces)
 {
@@ -524,19 +632,27 @@ void game_loop(bool& quit, std::vector<province> & provinces)
     std::vector<std::unique_ptr<icon>> icon_holder;
     std::vector<hero> all_heros;
     std::vector<equipment> martyr_equip;
+<<<<<<< HEAD
         
+=======
+    
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     coordinate cool{250, 250};
     event temp_event (cool, event_ids, provinces);
     
     bool paused = false;
     
     std::vector<event> active_events =  {temp_event};
+<<<<<<< HEAD
     std::vector<returning_party> returning_heros;
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     std::chrono::system_clock::time_point last_update;
     std::chrono::system_clock::time_point now;
     last_update = std::chrono::system_clock::now();
     double time_to_next = 1000;
 
+<<<<<<< HEAD
     archetype martyr = archetype("Martyr", "Mtyr", martyr_equip);
     archetype hierophant = archetype("Hierophant", "Hiero", martyr_equip);
     archetype imperator = archetype("Imperator", "Imp", martyr_equip);
@@ -560,6 +676,25 @@ void game_loop(bool& quit, std::vector<province> & provinces)
     std::sort(all_windows.begin(), all_windows.end(), window_compare);
     std::vector<window_UI*> all_windows_correct_draw_order = {all_windows.rbegin(), all_windows.rend()};
     
+=======
+    archetype martyr = archetype("Martyr", martyr_equip);
+    archetype hierophant = archetype("Hierophant", martyr_equip);
+    archetype imperator = archetype("Imperator", martyr_equip);
+    imperator.abbrv = "Imp";
+    std::unordered_map<std::string, texture_holder> archetype_icons;
+    hero temp = hero(5, 5, 5, 5, 5, 5, 5, true, 5, true, "Aurelian of the Golden Fist", imperator);
+    all_heros.push_back(temp);
+    //border_drawer window_borders = border_drawer(&corner, &center, &line);
+    /*hero_window(<#texture_holder *background#>, <#texture_holder *button_img#>, <#int x1#>, <#int y1#>, <#int x2#>, <#int y2#>, <#int z#>, <#int x_off#>, <#int y_off#>, <#int x_inc#>, <#int y_inc#>, <#std::vector<hero> *every_hero_ref#>, <#int sub_x#>, <#int sub_y#>, <#int sub_e_x#>, <#int sub_h#>, <#std::unordered_map<std::string, texture_holder> &archetype_icons#>)
+     */
+    hero_infoscreen detailed_view = hero_infoscreen(&box_background, 60, 40, 460, 700, 3, 50, 30, 0, 50, &all_heros, 50, 75, 350, 50, archetype_icons);
+    hero_window org_window = hero_window(&window_background, &box_background, &detailed_view, direction::left, 60, 40, 1220, 700, 2, 20, 80, 40, 80, &all_heros, 80, 100, 80, 50, archetype_icons);
+    roster_screen roster = roster_screen(&window_background, &box_background, 160, 240, 460, 600, 1, 40, 40, 40, 80, &all_heros, 30, 60, 30, 38, archetype_icons);
+    event_infoscreen event_window = event_infoscreen(&window_background, &box_background, &roster, direction::left, 160, 240, 1000, 600, 1, 40, 40, 0,0, &all_heros, 40, 40, 1000-40, 600-240-80, archetype_icons);
+    //split the event_infoscreen in half for selected?
+    texture_holder equipment_subrect (renderer, "equipment.png");
+    std::vector<window_UI*> all_windows = {&org_window, &detailed_view, &event_window, &roster};
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     //names make them more distiguishable incase I decide to separate
     std::vector<std::unique_ptr<texture_holder>> maps;
 
@@ -578,11 +713,14 @@ void game_loop(bool& quit, std::vector<province> & provinces)
     icon_holder.push_back(std::move(characters_icon));
     icon_holder.push_back(std::move(crafting_icon));
     icon_holder.push_back(std::move(research_icon));
+<<<<<<< HEAD
     
     std::vector<SDL_Color> priority_font_colors = {SDL_Color{200, 200, 200, 255}, SDL_Color{200, 0, 0, 255},
                                                     SDL_Color{0, 200, 0, 255}, SDL_Color{0, 0, 200, 255}};
     message_box feed_in_events = message_box(SDL_Rect{0, 0, 300, 600}, priority_font_colors);
     
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
     SDL_Event e;
     int mouse_x, mouse_y;
     int map_height=512;
@@ -622,8 +760,13 @@ void game_loop(bool& quit, std::vector<province> & provinces)
                 {
                     case SDL_BUTTON_LEFT:
                         SDL_GetMouseState(&mouse_x, &mouse_y);
+<<<<<<< HEAD
                         left_mouse_click(mouse_x, mouse_y, active_events, all_windows, all_heros,
                                          minimap, current_screen, mini_size, in_mini_click, paused,
+=======
+                        left_mouse_click(mouse_x, mouse_y, active_events, all_windows,
+                                         minimap, current_screen, mini_size, in_mini_click,
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                                          dragging, drag_x, drag_y, pre_drag_cam_x, pre_drag_cam_y, icon_holder);
                         break;
                 }
@@ -637,10 +780,13 @@ void game_loop(bool& quit, std::vector<province> & provinces)
                         camera_x=pre_drag_cam_x-change_x;
                         camera_y=pre_drag_cam_y-change_y;
                     }
+<<<<<<< HEAD
                     else
                     {
                         
                     }
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                     break;
                 case SDL_MOUSEBUTTONUP:
                     in_mini_click=false;
@@ -662,6 +808,7 @@ void game_loop(bool& quit, std::vector<province> & provinces)
                         case SDLK_RIGHT:
                             camera_x+=15;
                             break;
+<<<<<<< HEAD
                         case SDLK_SPACE:
                             std::cout<<"sweet";
                             if (paused)
@@ -680,6 +827,8 @@ void game_loop(bool& quit, std::vector<province> & provinces)
                                 paused=true;
                             }
                             break;
+=======
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
                     }
                 }
             }
@@ -691,7 +840,11 @@ void game_loop(bool& quit, std::vector<province> & provinces)
         {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
+<<<<<<< HEAD
             draw_everything(maps, map_width, map_height, active_events, minimap, mini_size, mini_equiv_x, mini_equiv_y, mini_equiv_w, mini_equiv_h, current_screen, bottom_bar, paused, all_windows_correct_draw_order, center, corner, line, equipment_subrect, provinces, icon_holder);
+=======
+            draw_everything(maps, map_width, map_height, active_events, minimap, mini_size, mini_equiv_x, mini_equiv_y, mini_equiv_w, mini_equiv_h, current_screen, bottom_bar, paused, all_windows, center, corner, line, equipment_subrect, provinces, icon_holder);
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
             SDL_RenderPresent(renderer);
             SDL_Delay(10);
         }
@@ -699,7 +852,11 @@ void game_loop(bool& quit, std::vector<province> & provinces)
         if (std::chrono::duration<double, std::milli>(now-last_update).count()>time_to_next && (!paused))
         {
             last_update=now;
+<<<<<<< HEAD
             update_time(all_heros, active_events, provinces, returning_heros);
+=======
+            update_time(active_events, provinces);
+>>>>>>> 5468ec0cea3e68d47fe8dbf96a922d30c632e770
         }
     }
 }
