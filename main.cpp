@@ -56,7 +56,7 @@ SDL_Rect camera_view;
 int year = 17;
 int month = 5;
 int day = 30;
-int hour = 8;
+int hour = 18;
 std::string reign_name = "Antony";
 //dryseed-march
 //greenshoot -april
@@ -121,7 +121,9 @@ bool window_compare(window_UI* & i, window_UI* & j)
     return (i->get_z() > j->get_z());
 }
 
-void update_time(std::vector<hero> & all_heros, std::vector<event> & active_events, std::vector<province> & provinces, std::vector<returning_party>& returning_heros)
+void update_time(message_box& message_holder,
+                 std::vector<hero> & all_heros, std::vector<event> & active_events,
+                 std::vector<province> & provinces, std::vector<returning_party>& returning_heros)
 {
     hour+=1;
     std::vector<returning_party> parties_finished;
@@ -160,6 +162,8 @@ void update_time(std::vector<hero> & all_heros, std::vector<event> & active_even
                 returning_heros.push_back(returning_party(happening.indices_of_sent, /*happening.time_to_travel*/ 5));
             }
             to_remove.push_back(happening);
+            std::string event_ending_message = "The situation at " + std::to_string(happening.location.x) + "," + std::to_string(happening.location.y) + " was not dealt with in time. Repercussions have been incurred";
+            message_holder.feed_info_in(renderer, general_font, event_ending_message, 1, happening.location, true);
         }
     }
     for (event & no_longer_active : to_remove)
@@ -167,6 +171,7 @@ void update_time(std::vector<hero> & all_heros, std::vector<event> & active_even
         auto iterator = std::find(active_events.begin(), active_events.end(), no_longer_active);
         active_events.erase(iterator);
     }
+    message_holder.update(renderer, general_font);
     if (hour>24)
     {
         hour=1;
@@ -177,6 +182,8 @@ void update_time(std::vector<hero> & all_heros, std::vector<event> & active_even
             coordinate temp_coord = {rand_x(eng), rand_y(eng)};
             event temp_event (temp_coord, event_ids, provinces);
             active_events.push_back(temp_event);
+            std::string event_ending_message = "A situation has arisen at " + std::to_string(temp_coord.x) + "," + std::to_string(temp_coord.y) + ".  You must deal with it before it spirals out of control.";
+            message_holder.feed_info_in(renderer, general_font, event_ending_message, 1, temp_coord, true);
         }
     }
     if (day>30)
@@ -372,7 +379,7 @@ void draw_everything
                      SDL_Rect& minimap, float mini_size, int mini_equiv_x, int mini_equiv_y, int mini_equiv_w, int mini_equiv_h,
                      SDL_Rect& current_screen, SDL_Rect& bottom_bar, bool& paused, std::vector<window_UI*>& all_windows_correct_draw_order,
                      texture_holder& center, texture_holder& corner, texture_holder& line, texture_holder& equipment_subrect,
-                     std::vector<province> provinces, std::vector<std::unique_ptr<icon>>& icon_holder
+                     std::vector<province> provinces, std::vector<std::unique_ptr<icon>>& icon_holder, message_box& message_holder
 )
 {
     for (int i=0; i<maps.size(); i++)
@@ -429,6 +436,7 @@ void draw_everything
     + " Day: " + std::to_string(day) + " Hour: " + std::to_string(hour);
     
     write_text(bottom_bar.x, bottom_bar.y, fancy_date, renderer, general_font, font_color_white);
+    message_holder.draw_message_box(renderer, general_font);
     for (window_UI* & to_draw : all_windows_correct_draw_order)
     {
         if (to_draw->shown)
@@ -581,7 +589,7 @@ void game_loop(bool& quit, std::vector<province> & provinces)
     
     std::vector<SDL_Color> priority_font_colors = {SDL_Color{200, 200, 200, 255}, SDL_Color{200, 0, 0, 255},
                                                     SDL_Color{0, 200, 0, 255}, SDL_Color{0, 0, 200, 255}};
-    message_box feed_in_events = message_box(SDL_Rect{0, 0, 300, 600}, priority_font_colors);
+    message_box message_holder = message_box(SDL_Rect{0, 0, 300, 600}, priority_font_colors);
     
     SDL_Event e;
     int mouse_x, mouse_y;
@@ -623,7 +631,7 @@ void game_loop(bool& quit, std::vector<province> & provinces)
                     case SDL_BUTTON_LEFT:
                         SDL_GetMouseState(&mouse_x, &mouse_y);
                         left_mouse_click(mouse_x, mouse_y, active_events, all_windows, all_heros,
-                                         minimap, current_screen, mini_size, in_mini_click, paused,
+                                         minimap, current_screen, mini_size, paused, in_mini_click,
                                          dragging, drag_x, drag_y, pre_drag_cam_x, pre_drag_cam_y, icon_holder);
                         break;
                 }
@@ -691,7 +699,7 @@ void game_loop(bool& quit, std::vector<province> & provinces)
         {
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
-            draw_everything(maps, map_width, map_height, active_events, minimap, mini_size, mini_equiv_x, mini_equiv_y, mini_equiv_w, mini_equiv_h, current_screen, bottom_bar, paused, all_windows_correct_draw_order, center, corner, line, equipment_subrect, provinces, icon_holder);
+            draw_everything(maps, map_width, map_height, active_events, minimap, mini_size, mini_equiv_x, mini_equiv_y, mini_equiv_w, mini_equiv_h, current_screen, bottom_bar, paused, all_windows_correct_draw_order, center, corner, line, equipment_subrect, provinces, icon_holder, message_holder);
             SDL_RenderPresent(renderer);
             SDL_Delay(10);
         }
@@ -699,7 +707,7 @@ void game_loop(bool& quit, std::vector<province> & provinces)
         if (std::chrono::duration<double, std::milli>(now-last_update).count()>time_to_next && (!paused))
         {
             last_update=now;
-            update_time(all_heros, active_events, provinces, returning_heros);
+            update_time(message_holder, all_heros, active_events, provinces, returning_heros);
         }
     }
 }

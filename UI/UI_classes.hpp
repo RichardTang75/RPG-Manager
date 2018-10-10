@@ -187,6 +187,10 @@ struct scroll_helper
 
 struct event_message
 {
+    bool operator==(const event_message& other) const
+    {
+        return (message == other.message && zoom_to == other.zoom_to && priority==other.priority && time == other.time);
+    }
     std::string message;
     coordinate zoom_to;
     int priority;
@@ -205,6 +209,8 @@ void insert_sorted_event_message(std::vector<event_message>& messages, event_mes
 }
 
 //alpha fade in and fade out, high priority go on top, last longer. low-6 hrs, normal-12 hrs, high-24 hrs, highest-168
+//on delete do full recheck
+//on add do basic best
 class message_box
 {
 public:
@@ -213,7 +219,7 @@ public:
         bounds=in_bounds;
         priority_font_colors= in_priority_font_colors;
     }
-    void feed_info_in(std::string& message, int priority, coordinate location)
+    void feed_info_in(SDL_Renderer* to_use, TTF_Font* use_font, std::string& message, int priority, coordinate& location, bool ending)
     {
         int time_message_lasts=0;
         switch (priority)
@@ -231,33 +237,64 @@ public:
                 time_message_lasts=6;
                 break;
         };
-        event_message add_message = event_message{message, priority, time_message_lasts};
-        insert_sorted_event_message(active_event_messages, add_message);
-    }
-    void update()
-    {
-        std::vector<int> indexes_to_erase;
-        for (int i=0; i<active_event_messages.size(); i++)
+        if (ending)
         {
-            event_message& current_event_message = active_event_messages[i];
+            time_message_lasts/=2;
+        }
+        event_message add_message = event_message{message, location, priority, time_message_lasts};
+        insert_sorted_event_message(active_event_messages, add_message);
+        int text_width, text_height;
+        std::tie(text_width, text_height) = get_text_size_wrapped(message, to_use, use_font, bounds.w);
+        if (text_height > y_increment)
+        {
+            y_increment = text_height;
+        }
+    }
+    void update(SDL_Renderer* to_use, TTF_Font* use_font)
+    {
+        std::vector<event_message> messages_to_erase;
+        bool message_expire=false;
+        for (event_message & current_event_message : active_event_messages)
+        {
             current_event_message.time-=1;
             if (current_event_message.time<=0)
             {
-                indexes_to_erase.push_back(i);
+                message_expire=true;
+                messages_to_erase.push_back(current_event_message);
             }
         }
-        for (int index_to_erase : indexes_to_erase)
+        for (event_message & to_erase : messages_to_erase)
         {
-            active_event_messages.erase(active_event_messages.begin()+index_to_erase);
+            auto iterator = std::find(active_event_messages.begin(), active_event_messages.end(), to_erase);
+            event_message is_it = *iterator;
+            if (iterator != active_event_messages.end())
+            {
+                active_event_messages.erase(iterator);
+            }
+        }
+        if (message_expire)
+        {
+            y_increment=0;
+            for (event_message & remaining : active_event_messages)
+            {
+                int text_width, text_height;
+                std::tie(text_width, text_height) = get_text_size_wrapped(remaining.message, to_use, use_font, bounds.w);
+                if (text_height > y_increment)
+                {
+                    y_increment = text_height;
+                }
+            }
         }
     }
     void draw_message_box(SDL_Renderer* to_use, TTF_Font* font_use)
     {
         //std::vector<SDL_Color> priorities
         //use /n?, won't work, priorities
+        SDL_SetRenderDrawColor(to_use, 0, 0, 0, 255);
+        SDL_RenderDrawRect(to_use, &bounds);
         for (int i=0; i<active_event_messages.size(); i++)
         {
-            write_text(bounds.x, bounds.y+y_increment*i, active_event_messages[i].message, to_use, font_use, priority_font_colors[active_event_messages[i].priority-1]);
+            write_text(bounds.x, bounds.y+y_increment*i, active_event_messages[i].message, to_use, font_use, priority_font_colors[active_event_messages[i].priority-1], bounds.w);
         }
     }
     void handle_click(int mouse_x, int mouse_y, int& camera_x, int& camera_y)
@@ -274,7 +311,14 @@ public:
     void scroll(int change)
     {
         message_box_scroll_aid.current_scroll+=change;
-        if (message_box_scroll_aid.max_scroll || message_box_)
+        if (message_box_scroll_aid.current_scroll > message_box_scroll_aid.max_scroll)
+        {
+            message_box_scroll_aid.current_scroll = message_box_scroll_aid.max_scroll;
+        }
+        else if (message_box_scroll_aid.current_scroll < message_box_scroll_aid.min_scroll)
+        {
+            message_box_scroll_aid.current_scroll = message_box_scroll_aid.min_scroll;
+        }
     }
 private:
     SDL_Rect bounds;
@@ -282,7 +326,7 @@ private:
     std::vector<SDL_Color> priority_font_colors;
     std::vector<button> message_interactions; //remove this, write interactions manually
     scroll_helper message_box_scroll_aid;
-    int y_increment=20;
+    int y_increment=0;
 };
 
 //lasts for 30-90 days? only show

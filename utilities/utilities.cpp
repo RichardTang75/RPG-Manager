@@ -30,6 +30,15 @@ bool in_bounds(int where_x, int where_y, int lower_bound_x, int lower_bound_y, i
 
 
 //maybe save these textures?
+tuple_int get_text_size_wrapped(std::string what_to_write, SDL_Renderer* use_renderer,
+                                TTF_Font* use_font, int wrap_length = 9000)
+{
+    SDL_Surface* text_surface = TTF_RenderText_Blended_Wrapped(use_font, what_to_write.c_str(), SDL_Color{0, 0, 0, 255}, wrap_length);
+    int text_width = text_surface->w;
+    int text_height = text_surface->h;
+    SDL_FreeSurface(text_surface);
+    return tuple_int(text_width, text_height);
+}
 void write_text(int start_x, int start_y, std::string what_to_write, SDL_Renderer* use_renderer,
                 TTF_Font* use_font, SDL_Color font_color, int wrap_length = 9000)
 {

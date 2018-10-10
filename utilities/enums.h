@@ -34,6 +34,10 @@ typedef std::tuple<int, int> tuple_int;
 
 struct coordinate
 {
+    bool operator==(const coordinate& other) const
+    {
+        return (x==other.x && y==other.y);
+    }
     int x;
     int y;
 };
